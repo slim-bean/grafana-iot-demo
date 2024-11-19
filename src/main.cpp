@@ -34,13 +34,14 @@ SHT3X sht3x;
 QMP6988 qmp;
 
 // Create a write request for 2 series.
-WriteRequest req(5, 1024);
+WriteRequest req(6, 1024);
 
-TimeSeries temp(1, "temperature_f", "{location=\"281\"}");
-TimeSeries humidity(1, "humidity", "{location=\"281\"}");
-TimeSeries pressure(1, "pressure", "{location=\"281\"}");
-TimeSeries iUSB(1, "current", "{location=\"281\"}");
-TimeSeries vBat(1, "vbat", "{location=\"281\"}");
+TimeSeries temp(1, "temperature_f", "{job=\"env-mon\",location=\"281\"}");
+TimeSeries humidity(1, "humidity", "{job=\"env-mon\",location=\"281\"}");
+TimeSeries pressure(1, "pressure", "{job=\"env-mon\",location=\"281\"}");
+TimeSeries iUSB(1, "current", "{job=\"env-mon\",location=\"281\"}");
+TimeSeries vBat(1, "vbat", "{job=\"env-mon\",location=\"281\"}");
+TimeSeries uptime(1, "uptime", "{job=\"env-mon\",location=\"281\"}");
 
 //TODO add more values (make sure to increase WriteRequest above and add the series in the end of setup() below )
 
@@ -132,6 +133,7 @@ void setup() {
     req.addTimeSeries(pressure);
     req.addTimeSeries(iUSB);
     req.addTimeSeries(vBat);
+    req.addTimeSeries(uptime);
     req.setDebug(Serial);
 
     esp_task_wdt_reset();
@@ -229,6 +231,9 @@ void loop() {
     if (!vBat.addSample(time, vbat)) {
         Serial.println(vBat.errmsg);
     }
+    if (!uptime.addSample(time, millis())) {
+        Serial.println(uptime.errmsg);
+    }
 
     for (uint8_t i = 0; i <= 5; i++)
     {
@@ -246,6 +251,7 @@ void loop() {
             pressure.resetSamples();
             iUSB.resetSamples();
             vBat.resetSamples();
+            uptime.resetSamples();
             uint32_t diff = millis() - start;
             Serial.print("Prom send succesful in ");
             Serial.print(diff);
